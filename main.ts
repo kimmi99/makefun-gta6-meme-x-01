@@ -34,4 +34,13 @@ mkdirSync(OUTPUT_DIR, { recursive: true });
 const out = join(OUTPUT_DIR, 'POST.json');
 copyFileSync(POST_FILE, out);
 chmodSync(out, 0o644);
+
+// Read the copy back and verify it names the same post before reporting
+// success: a truncated or swapped output would hand the grader a bad
+// address, so fail loudly instead of exiting 0 on a bad copy.
+const written = JSON.parse(readFileSync(out, 'utf8')) as { url?: unknown };
+if (written.url !== url) {
+  console.error(`POST.json verification failed: wrote ${JSON.stringify(written)}, expected ${url}`);
+  process.exit(1);
+}
 console.log(`POST.json -> ${out} (${url})`);
